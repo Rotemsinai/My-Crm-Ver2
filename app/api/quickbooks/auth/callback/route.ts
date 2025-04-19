@@ -16,14 +16,24 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state")
   const realmId = searchParams.get("realmId")
 
-  // Validate the state parameter to prevent CSRF attacks
-  if (!code || !state || !realmId) {
+  console.log("Callback received with params:", { code: code?.substring(0, 5) + "...", state, realmId })
+
+  // Validate the required parameters
+  if (!code || !realmId) {
+    console.error("Missing required parameters:", { code, realmId })
     return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
   }
 
   try {
     // Exchange the authorization code for tokens
     const tokenUrl = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+
+    console.log("Exchanging code for tokens with params:", {
+      grant_type: "authorization_code",
+      code: code.substring(0, 5) + "...",
+      redirect_uri: QB_CONFIG.redirectUri,
+    })
+
     const tokenResponse = await axios.post(
       tokenUrl,
       new URLSearchParams({
@@ -41,6 +51,11 @@ export async function GET(request: NextRequest) {
 
     // Extract the tokens
     const { access_token, refresh_token, expires_in } = tokenResponse.data
+    console.log("Received tokens:", {
+      access_token: access_token?.substring(0, 5) + "...",
+      refresh_token: refresh_token?.substring(0, 5) + "...",
+      expires_in,
+    })
 
     // Store the tokens securely (in a real app, you would store these in a database)
     const authData = {
