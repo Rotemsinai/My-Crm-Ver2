@@ -5,7 +5,7 @@ export const QB_CONFIG = {
   // These are only used server-side
   clientSecret: process.env.QUICKBOOKS_CLIENT_SECRET || "",
   redirectUri: process.env.QUICKBOOKS_REDIRECT_URI || "",
-  environment: "sandbox", // Explicitly set to sandbox
+  environment: "production", // Changed from "sandbox" to "production"
   scopes: ["com.intuit.quickbooks.accounting", "com.intuit.quickbooks.payment"],
 }
 
