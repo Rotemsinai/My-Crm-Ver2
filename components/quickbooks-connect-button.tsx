@@ -1,12 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { getQuickBooksAuthUrl } from "@/lib/quickbooks/simple-auth"
 
 export function QuickBooksConnectButton() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [authUrl, setAuthUrl] = useState<string | null>(null)
+
+  // Generate the auth URL when the component mounts
+  useEffect(() => {
+    try {
+      const url = getQuickBooksAuthUrl()
+      setAuthUrl(url)
+    } catch (err: any) {
+      console.error("Error generating QuickBooks auth URL:", err)
+      setError("Failed to generate authorization URL")
+    }
+  }, [])
 
   const handleConnect = () => {
     setIsLoading(true)
@@ -15,8 +27,9 @@ export function QuickBooksConnectButton() {
     try {
       console.log("Connecting to QuickBooks...")
 
-      // Get the authorization URL using our simplified helper
-      const authUrl = getQuickBooksAuthUrl()
+      if (!authUrl) {
+        throw new Error("Authorization URL not available")
+      }
 
       // Log for debugging
       console.log("Generated auth URL (partial):", authUrl.substring(0, 60) + "...")
@@ -41,7 +54,7 @@ export function QuickBooksConnectButton() {
 
       <Button
         onClick={handleConnect}
-        disabled={isLoading}
+        disabled={isLoading || !authUrl}
         className="bg-green-600 hover:bg-green-700 text-white"
         size="lg"
       >
