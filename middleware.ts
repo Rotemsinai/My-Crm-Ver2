@@ -12,6 +12,9 @@ export function middleware(request: NextRequest) {
   // Get the authentication token from the cookies
   const token = request.cookies.get("authToken")?.value
 
+  // For debugging
+  console.log("Path:", path, "Token:", token, "IsPublicPath:", isPublicPath)
+
   // Redirect logic
   if (isPublicPath && token) {
     // If user is on a public path but has a token, redirect to dashboard
