@@ -26,9 +26,14 @@ export function getQuickBooksAuthUrl() {
     return "#error-no-client-id"
   }
 
+  const state = generateRandomState()
+  if (typeof window !== "undefined") {
+    localStorage.setItem("qb_oauth_state", state)
+  }
+
   // IMPORTANT: Manually construct the URL instead of using URLSearchParams
   // This ensures proper encoding of all parameters
-  return `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(generateRandomState())}`
+  return `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
 }
 
 // Verify the returned OAuth state
