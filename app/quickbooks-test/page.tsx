@@ -1,34 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { v4 as uuidv4 } from "uuid"
+import { useState, useEffect } from "react"
+import { buildAuthorizationUrl } from "@/lib/quickbooks/simple-auth"
 
 export default function QuickbooksTest() {
   const [authUrl, setAuthUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const state = uuidv4()
-    // Store the state in localStorage for later verification
-    localStorage.setItem("quickbooks_auth_state", state)
-
-    // Make sure to use the EXACT same redirect URI as registered in QuickBooks Developer Portal
-    const redirectUri =
-      process.env.NEXT_PUBLIC_QUICKBOOKS_REDIRECT_URI || "https://www.mrs-crm.com/api/quickbooks/auth/callback"
-
-    // Construct the authorization URL with the correct redirect_uri
-    const authUrl = `https://appcenter.intuit.com/connect/oauth2/authorize?client_id=${
-      process.env.NEXT_PUBLIC_QUICKBOOKS_CLIENT_ID
-    }&response_type=code&scope=com.intuit.quickbooks.accounting%20com.intuit.quickbooks.payment&redirect_uri=${encodeURIComponent(
-      redirectUri,
-    )}&state=${state}`
-
-    setAuthUrl(authUrl)
+    try {
+      // Get the authorization URL directly
+      const url = buildAuthorizationUrl()
+      setAuthUrl(url)
+    } catch (err) {
+      console.error("Error generating QuickBooks auth URL:", err)
+      setError("Failed to generate authorization URL")
+    }
   }, [])
 
   return (
     <div className="max-w-4xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">QuickBooks OAuth2 Test</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
+            <p className="font-medium">Error connecting to QuickBooks</p>
+            <p>{error}</p>
+          </div>
+        )}
+
         {authUrl ? (
           <>
             <p className="mb-4">Click the button below to connect your QuickBooks account:</p>
@@ -39,9 +39,9 @@ export default function QuickbooksTest() {
               Connect to QuickBooks
             </a>
           </>
-        ) : (
+        ) : !error ? (
           <p>Loading authorization URL...</p>
-        )}
+        ) : null}
       </div>
     </div>
   )
