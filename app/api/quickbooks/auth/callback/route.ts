@@ -4,7 +4,6 @@ export async function GET(request: NextRequest) {
   // Get the authorization code and state from the query parameters
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get("code")
-  const state = searchParams.get("state")
   const realmId = searchParams.get("realmId") // QuickBooks company ID
 
   if (!code) {
@@ -36,14 +35,13 @@ export async function GET(request: NextRequest) {
 
     const tokenData = await tokenResponse.json()
 
-    // Store the tokens securely (this is just an example - implement secure storage in production)
-    // In a real application, you would store these tokens in a database
+    // Log the tokens (in a real app, you would store these securely)
     console.log("Access Token:", tokenData.access_token)
     console.log("Refresh Token:", tokenData.refresh_token)
     console.log("Realm ID:", realmId)
 
-    // Redirect to a success page
-    return NextResponse.redirect(new URL("/quickbooks-success", request.url))
+    // Redirect to a success page or dashboard
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   } catch (error) {
     console.error("Error in QuickBooks callback:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
