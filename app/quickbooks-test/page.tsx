@@ -1,69 +1,61 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function QuickBooksTest() {
-  const [authUrl, setAuthUrl] = useState<string | null>(null)
+export default function QuickBooksSandboxTest() {
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
-  // Generate a random state for OAuth security
-  function generateRandomState() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-  }
+  // Function to handle the QuickBooks connection
+  const connectToQuickBooks = () => {
+    setIsRedirecting(true)
 
-  // Handle the connect button click
-  const handleConnect = () => {
-    if (authUrl) {
-      window.location.href = authUrl
-    }
-  }
-
-  // Generate the QuickBooks authorization URL with hardcoded values
-  useEffect(() => {
-    const baseUrl = "https://appcenter.intuit.com/connect/oauth2"
-
-    // Hardcoded values for testing
-    const clientId = "ABql0pShkQa5slEw8mvzFJdS0sCmPbJ4mQM2Dvn6PLMYxE73V" // Your QuickBooks client ID
+    // Sandbox-specific configuration
+    const clientId = process.env.NEXT_PUBLIC_QUICKBOOKS_CLIENT_ID || "ABql0pShkQa5slEw8mvzFJdS0sCmPbJ4mQM2Dvn6PLMYxE73V"
     const redirectUri = "https://www.mrs-crm.com/api/quickbooks/auth/callback"
+    const scopes = "com.intuit.quickbooks.accounting+com.intuit.quickbooks.payment"
+    const state = Math.random().toString(36).substring(2, 15)
 
-    // IMPORTANT: Use + instead of spaces for scopes
-    const scopesString = "com.intuit.quickbooks.accounting+com.intuit.quickbooks.payment"
-
-    const state = generateRandomState()
+    // Store state for verification later
     localStorage.setItem("qb_oauth_state", state)
 
-    // Manually construct the URL with proper encoding
-    const url = `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
+    // Construct the authorization URL for sandbox
+    const authUrl = `https://appcenter.intuit.com/connect/oauth2?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
 
-    setAuthUrl(url)
+    console.log("Redirecting to:", authUrl)
 
-    // Log the URL for debugging
-    console.log("Generated URL:", url)
-    window.location.href = url // Automatically redirect
-  }, [])
+    // Redirect to QuickBooks authorization page
+    window.location.href = authUrl
+  }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">QuickBooks Direct Test</h1>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-6">QuickBooks Sandbox Test</h1>
 
-      <div className="space-y-6">
-        <button onClick={handleConnect} className="bg-green-600 hover:bg-green-700 text-white" size="lg">
-          Connect to QuickBooks (Direct)
-        </button>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Connect to QuickBooks Sandbox</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">This page is specifically configured to connect to the QuickBooks Sandbox environment.</p>
 
-        {authUrl && (
-          <div className="mt-4 p-4 bg-gray-100 rounded-md">
-            <p className="font-medium mb-2">Generated Auth URL:</p>
-            <p className="text-sm break-all">{authUrl}</p>
-          </div>
-        )}
+          <Button onClick={connectToQuickBooks} disabled={isRedirecting} className="bg-green-600 hover:bg-green-700">
+            {isRedirecting ? "Redirecting..." : "Connect to QuickBooks Sandbox"}
+          </Button>
+        </CardContent>
+      </Card>
 
-        <div className="mt-8 p-4 border rounded-md">
-          <h2 className="text-xl font-semibold mb-2">Debugging Information</h2>
-          <p>This page bypasses all complex logic and directly creates an authorization URL with hardcoded values.</p>
-          <p className="mt-2">
-            If this works but the main integration doesn't, we know the issue is in our integration code.
-          </p>
-        </div>
+      <div className="p-4 bg-amber-50 rounded-md">
+        <h2 className="font-semibold mb-2">Important Notes:</h2>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>
+            Make sure your redirect URI is registered in the <strong>Sandbox Development settings</strong> in the
+            QuickBooks Developer Portal
+          </li>
+          <li>You must use a Sandbox company for testing</li>
+          <li>The sandbox environment is completely separate from the production environment</li>
+        </ul>
       </div>
     </div>
   )
