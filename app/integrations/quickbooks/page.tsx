@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-// Make sure the import path is correct
-import { getQuickBooksAuth } from "@/lib/quickbooks/simple-auth"
+// Change the import to use buildAuthorizationUrl directly
+import { buildAuthorizationUrl } from "@/lib/quickbooks/simple-auth"
 
 export default function QuickBooksIntegration() {
   const [authUrl, setAuthUrl] = useState<string | null>(null)
@@ -14,15 +14,8 @@ export default function QuickBooksIntegration() {
       // Add debugging to see what's happening
       setDebugInfo("Attempting to get QuickBooks auth URL...")
 
-      // Check if the function exists
-      if (typeof getQuickBooksAuth !== "function") {
-        setDebugInfo((prev) => prev + "\ngetQuickBooksAuth is not a function. Type: " + typeof getQuickBooksAuth)
-        setError("QuickBooks authentication function not available")
-        return
-      }
-
-      // Use the exported getQuickBooksAuth function
-      const url = getQuickBooksAuth()
+      // Use buildAuthorizationUrl directly instead of getQuickBooksAuth
+      const url = buildAuthorizationUrl()
       setAuthUrl(url)
       setDebugInfo((prev) => prev + "\nSuccessfully generated auth URL")
     } catch (err) {
