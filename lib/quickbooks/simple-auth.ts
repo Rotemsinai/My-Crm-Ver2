@@ -1,41 +1,48 @@
-// A simplified, direct QuickBooks auth helper
-
 // Generate a random state for OAuth security
 export function generateRandomState() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 }
 
-// Generate the QuickBooks authorization URL with hardcoded values for testing
+// Generate the QuickBooks authorization URL
 export function getQuickBooksAuthUrl() {
-  // Log what we're using for debugging
-  console.log("Creating QuickBooks auth URL")
+  // Debug environment variables
+  console.log("Environment Variables Check:")
+  console.log("- NEXT_PUBLIC_QUICKBOOKS_CLIENT_ID:", process.env.NEXT_PUBLIC_QUICKBOOKS_CLIENT_ID)
+  console.log("- QUICKBOOKS_REDIRECT_URI:", process.env.QUICKBOOKS_REDIRECT_URI)
 
-  // Use hardcoded values for testing
-  const clientId = "ABql0pShkQa5slEw8mvzFJdS0sCmPbJ4mQM2Dvn6PLMYxE73V"
-  const redirectUri = "https://www.mrs-crm.com/api/quickbooks/auth/callback"
-
-  // IMPORTANT: Join scopes with + instead of space
-  const scopesString = "com.intuit.quickbooks.accounting+com.intuit.quickbooks.payment"
-
-  console.log("Using client ID:", clientId ? clientId.substring(0, 5) + "..." : "NOT SET")
-  console.log("Using redirect URI:", redirectUri)
-  console.log("Using scopes:", scopesString)
-
-  // Generate a random state for security
-  const state = generateRandomState()
-
-  // Store state in localStorage for verification later
-  if (typeof window !== "undefined") {
-    localStorage.setItem("qb_oauth_state", state)
-  }
-
-  // Base URL for QuickBooks OAuth
   const baseUrl = "https://appcenter.intuit.com/connect/oauth2"
 
+  // Use the public environment variable for client ID
+  const clientId = process.env.NEXT_PUBLIC_QUICKBOOKS_CLIENT_ID || ""
+  // Use the server environment variable for redirect URI
+  const redirectUri = process.env.QUICKBOOKS_REDIRECT_URI || ""
+
+  // IMPORTANT: Use + instead of spaces for scopes
+  const scopes = ["com.intuit.quickbooks.accounting", "com.intuit.quickbooks.payment"]
+  const scopesString = scopes.join("+")
+
+  if (!clientId) {
+    console.error("CRITICAL ERROR: No QuickBooks Client ID available!")
+    return "#error-no-client-id"
+  }
+
   // IMPORTANT: Manually construct the URL instead of using URLSearchParams
-  const authUrl = `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
+  // This ensures proper encoding of all parameters
+  return `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(generateRandomState())}`
+}
 
-  console.log("Auth URL (partial):", authUrl.substring(0, 60) + "...")
+// Verify the returned OAuth state
+export function verifyOAuthState(state: string) {
+  if (typeof window !== "undefined") {
+    const storedState = localStorage.getItem("qb_oauth_state")
+    return state === storedState
+  }
+  return false
+}
 
-  return authUrl
+// Clear the OAuth state
+export function clearOAuthState() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("qb_oauth_state")
+  }
 }
