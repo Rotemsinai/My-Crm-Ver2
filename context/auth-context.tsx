@@ -162,10 +162,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const updatedUsers = users.map((u) => (u.id === updatedUser.id ? updatedUser : u))
       setUsers(updatedUsers)
 
-      // Store in both localStorage and cookies for redundancy
+      // Store in localStorage
       localStorage.setItem("mrs-user", JSON.stringify(updatedUser))
       localStorage.setItem("mrs-users", JSON.stringify(updatedUsers))
-      document.cookie = `mrs-user=${JSON.stringify(updatedUser)}; path=/; max-age=86400`
+
+      // Also set a cookie for the middleware
+      document.cookie = `authToken=true; path=/; max-age=86400; SameSite=Lax`
 
       setIsLoading(false)
       return true
@@ -191,6 +193,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("mrs-user", JSON.stringify(updatedUser))
       localStorage.setItem("mrs-users", JSON.stringify(updatedUsers))
       document.cookie = `mrs-user=${JSON.stringify(updatedUser)}; path=/; max-age=86400`
+      // Set a proper auth token cookie that will work with the middleware
+      document.cookie = `authToken=true; path=/; max-age=86400; SameSite=Lax`
 
       setIsLoading(false)
       return true
@@ -216,6 +220,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("mrs-user", JSON.stringify(updatedUser))
       localStorage.setItem("mrs-users", JSON.stringify(updatedUsers))
       document.cookie = `mrs-user=${JSON.stringify(updatedUser)}; path=/; max-age=86400`
+      // Set a proper auth token cookie that will work with the middleware
+      document.cookie = `authToken=true; path=/; max-age=86400; SameSite=Lax`
 
       setIsLoading(false)
       return true
@@ -243,6 +249,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("mrs-user", JSON.stringify(updatedUser))
       localStorage.setItem("mrs-users", JSON.stringify(updatedUsers))
       document.cookie = `mrs-user=${JSON.stringify(updatedUser)}; path=/; max-age=86400`
+      // Set a proper auth token cookie that will work with the middleware
+      document.cookie = `authToken=true; path=/; max-age=86400; SameSite=Lax`
 
       setIsLoading(false)
       return true
