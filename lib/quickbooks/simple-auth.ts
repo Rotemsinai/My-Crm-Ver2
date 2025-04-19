@@ -10,7 +10,7 @@ export function generateRandomState() {
   return state
 }
 
-// This is the function that's missing - make sure it's exported
+// This function must be exported
 export function getQuickBooksAuth() {
   return buildAuthorizationUrl()
 }
