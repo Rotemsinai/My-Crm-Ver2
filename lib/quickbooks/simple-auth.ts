@@ -1,6 +1,21 @@
-// Make sure your authorization URL construction includes the EXACT redirect_uri parameter
-// that matches what's registered in QuickBooks Developer Portal
+// Make sure to export all necessary functions
 
+// Generate a random state string for OAuth security
+export function generateRandomState() {
+  let state = ""
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  for (let i = 0; i < 16; i++) {
+    state += possible.charAt(Math.floor(Math.random() * possible.length))
+  }
+  return state
+}
+
+// This is the function that's missing - make sure it's exported
+export function getQuickBooksAuth() {
+  return buildAuthorizationUrl()
+}
+
+// Build the authorization URL with all required parameters
 export function buildAuthorizationUrl(isProduction = false) {
   // Use the correct redirect URI based on environment
   const redirectUri = process.env.QUICKBOOKS_REDIRECT_URI || "https://www.mrs-crm.com/api/quickbooks/auth/callback"
@@ -14,13 +29,4 @@ export function buildAuthorizationUrl(isProduction = false) {
   })
 
   return `https://appcenter.intuit.com/connect/oauth2/authorize?${params.toString()}`
-}
-
-function generateRandomState() {
-  let state = ""
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-  for (let i = 0; i < 16; i++) {
-    state += possible.charAt(Math.floor(Math.random() * possible.length))
-  }
-  return state
 }
