@@ -1,42 +1,54 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 
-export default function QuickBooksTestPage() {
+export default function QuickBooksTest() {
   const [authUrl, setAuthUrl] = useState<string | null>(null)
 
-  const generateAuthUrl = () => {
-    // Hard-coded values
-    const clientId = "ABql0pShkQa5slEw8mvzFJdS0sCmPbJ4mQM2Dvn6PLMYxE73V"
+  // Generate a random state for OAuth security
+  function generateRandomState() {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+  }
+
+  // Handle the connect button click
+  const handleConnect = () => {
+    if (authUrl) {
+      window.location.href = authUrl
+    }
+  }
+
+  // Generate the QuickBooks authorization URL with hardcoded values
+  useEffect(() => {
+    const baseUrl = "https://appcenter.intuit.com/connect/oauth2"
+
+    // Hardcoded values for testing
+    const clientId = "ABql0pShkQa5slEw8mvzFJdS0sCmPbJ4mQM2Dvn6PLMYxE73V" // Your QuickBooks client ID
     const redirectUri = "https://www.mrs-crm.com/api/quickbooks/auth/callback"
 
-    // IMPORTANT: Use + instead of space for scopes
+    // IMPORTANT: Use + instead of spaces for scopes
     const scopesString = "com.intuit.quickbooks.accounting+com.intuit.quickbooks.payment"
 
-    const state = Math.random().toString(36).substring(2, 15)
+    const state = generateRandomState()
+    localStorage.setItem("qb_oauth_state", state)
 
-    // IMPORTANT: Manually construct the URL instead of using URLSearchParams
-    const url = `https://appcenter.intuit.com/connect/oauth2?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
+    // Manually construct the URL with proper encoding
+    const url = `${baseUrl}?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=${encodeURIComponent(scopesString)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`
 
     setAuthUrl(url)
-    return url
-  }
 
-  const handleConnect = () => {
-    const url = generateAuthUrl()
+    // Log the URL for debugging
     console.log("Generated URL:", url)
-    window.location.href = url
-  }
+    window.location.href = url // Automatically redirect
+  }, [])
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">QuickBooks Direct Test</h1>
 
       <div className="space-y-6">
-        <Button onClick={handleConnect} className="bg-green-600 hover:bg-green-700 text-white" size="lg">
+        <button onClick={handleConnect} className="bg-green-600 hover:bg-green-700 text-white" size="lg">
           Connect to QuickBooks (Direct)
-        </Button>
+        </button>
 
         {authUrl && (
           <div className="mt-4 p-4 bg-gray-100 rounded-md">
